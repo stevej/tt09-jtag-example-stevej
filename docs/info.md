@@ -9,7 +9,10 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-If you wish to export signals to a JTAG device, follow along
+If you wish to export signals to a JTAG device, follow along.
+
+Registers available:
+
 
 ## How to test
 
@@ -17,4 +20,4 @@ Hook up your jtag adapter to the appropriate pins and see what gets toggled.
 
 ## External hardware
 
-Segger J-Link and OpenOCD were used to test this design.
+Segger J-Link EDU and OpenOCD were used to test this design.

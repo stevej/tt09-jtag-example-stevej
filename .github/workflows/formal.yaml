@@ -1,0 +1,23 @@
+name: formal
+
+on:
+  [push, workflow_dispatch]
+
+jobs:
+  formal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: install oss-cad-suite
+        uses: YosysHQ/setup-oss-cad-suite@v3
+
+      - name: Run formal tests
+        working-directory: ./src
+        shell: bash
+        run: |
+          ./formal.sh
+

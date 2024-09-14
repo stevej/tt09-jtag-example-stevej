@@ -11,7 +11,6 @@ module minipit (
 );
 
   wire reset = !rst_n;
-  //wire [7:0] status;
 
   reg  r_interrupting;
   reg  r_counter_set;
@@ -27,7 +26,6 @@ module minipit (
   reg [ 7:0] divider_count;
 
   always @(posedge clk) begin
-    // if reset, set counter to 0
     if (reset) begin
       counter <= 0;
       current_count <= 0;

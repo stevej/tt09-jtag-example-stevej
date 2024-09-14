@@ -1,0 +1,17 @@
+[tasks]
+bmc
+
+[options]
+mode bmc
+depth 20
+
+[engines]
+smtbmc
+
+[script]
+read -formal jtag.v
+prep -top jtag
+memory_map -rom-only
+
+[files]
+jtag.v

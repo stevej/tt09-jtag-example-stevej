@@ -16,3 +16,5 @@ src/formal_bmc
 src/formal_cover
 src/formal_live
 src/formal_bmc_bmc
+src/formal_cover_cover
+src/formal_prove_prove

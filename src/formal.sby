@@ -1,0 +1,24 @@
+[tasks]
+bmc
+prove
+cover
+
+[options]
+bmc: mode bmc
+bmc: depth 20
+prove: mode prove
+cover: mode cover
+cover: append 10
+
+[engines]
+bmc: smtbmc
+prove: smtbmc
+cover: smtbmc z3
+
+[script]
+read -formal jtag.v
+prep -top jtag
+memory_map -rom-only
+
+[files]
+jtag.v

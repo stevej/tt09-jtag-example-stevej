@@ -2,7 +2,9 @@
 
 module jtag (
     input tck,
+    /* verilator lint_off UNUSEDSIGNAL */
     input tdi,
+    /* verilator lint_off UNUSEDSIGNAL */
     input tdo,
     input tms,
     input trst
@@ -29,7 +31,7 @@ module jtag (
 
   // for checking that the TAP state machine is in reset at the right time.
   reg [4:0] tms_reset_check;
-  reg [8:0] cycles;
+  reg [7:0] cycles;
 
   always @(posedge tck) begin
     if (trst) begin
@@ -106,8 +108,8 @@ module jtag (
         endcase
         Exit2Dr:  // 12
         case (tms)
-          1: current_state <= UpdateIr;
-          default: current_state <= ShiftIr;
+          1: current_state <= UpdateDr;
+          default: current_state <= ShiftDr;
         endcase
         Exit2Ir:  // 13
         case (tms)
@@ -157,23 +159,14 @@ module jtag (
       assert (current_state == TestLogicReset);
     end
 
-    if (f_past_valid) begin
-      // TRST puts us in state 0
-      if ($past(trst)) begin
-        assert (current_state == TestLogicReset);
-      end
+    // TRST puts us in state 0
+    if (f_past_valid && $past(trst)) begin
+      initial_state : assert (current_state == TestLogicReset);
+    end
 
-      if ($past(trst)) begin
-        cover (current_state == TestLogicReset);
-      end
-      /*
-      if (($past(current_state) == TestLogicReset) && ($past(tms) == 0)) begin
-        assert (current_state == RunTestOrIdle);
-      end
-*/
-      // Check that all valid state transitions have occurred.
-      //assert ($past(tms_reset_check) == 5'b1_1111 && current_state == TestLogicReset);
-      // Check that all states can reach TestLogicReset.
+    // RunTestOrIdle succeeds TestLogicReset
+    if (f_past_valid && $past(trst) && current_state == RunTestOrIdle) begin
+      state_0_to_1 : assert ($past(current_state) == TestLogicReset);
     end
   end
 `endif

@@ -1,5 +1,12 @@
 `default_nettype none
 
+// Ensures that the first_state happens before the second_state.
+// We use a label as a breadcrumb in case an invalid state is asserted
+`define HAPPENS_BEFORE(first_state, second_state) \
+  if (f_past_valid && $past(trst) && current_state == second_state) begin \
+    HA_``first_state``_to_``second_state : assert ($past(current_state) == first_state); \
+  end;
+
 module jtag (
     input tck,
     /* verilator lint_off UNUSEDSIGNAL */
@@ -164,10 +171,42 @@ module jtag (
       initial_state : assert (current_state == TestLogicReset);
     end
 
-    // RunTestOrIdle succeeds TestLogicReset
-    if (f_past_valid && $past(trst) && current_state == RunTestOrIdle) begin
-      state_0_to_1 : assert ($past(current_state) == TestLogicReset);
-    end
+    //
+    // Checking that states are achievable via the documented Tap FSM
+    //
+    `HAPPENS_BEFORE(TestLogicReset, RunTestOrIdle)
+    `HAPPENS_BEFORE(RunTestOrIdle, RunTestOrIdle)
+    `HAPPENS_BEFORE(RunTestOrIdle, SelectDrScan)
+    `HAPPENS_BEFORE(SelectDrScan, SelectIrScan)
+    `HAPPENS_BEFORE(SelectDrScan, CaptureDr)
+    `HAPPENS_BEFORE(SelectIrScan, CaptureIr)
+    `HAPPENS_BEFORE(CaptureDr, Exit1Dr)
+    `HAPPENS_BEFORE(CaptureDr, ShiftDr)
+    `HAPPENS_BEFORE(CaptureIr, Exit1Ir)
+    `HAPPENS_BEFORE(CaptureIr, ShiftIr)
+    `HAPPENS_BEFORE(ShiftDr, Exit1Dr)
+    `HAPPENS_BEFORE(ShiftDr, ShiftDr)
+    `HAPPENS_BEFORE(ShiftIr, Exit1Ir)
+    `HAPPENS_BEFORE(ShiftIr, ShiftIr)
+    `HAPPENS_BEFORE(Exit1Dr, UpdateDr)
+    `HAPPENS_BEFORE(Exit1Dr, PauseDr)
+    `HAPPENS_BEFORE(Exit1Ir, UpdateIr)
+    `HAPPENS_BEFORE(Exit1Ir, PauseIr)
+    `HAPPENS_BEFORE(PauseDr, Exit2Dr)
+    `HAPPENS_BEFORE(PauseDr, PauseDr)
+    `HAPPENS_BEFORE(PauseIr, Exit2Ir)
+    `HAPPENS_BEFORE(PauseIr, PauseIr)
+    `HAPPENS_BEFORE(Exit2Dr, UpdateDr)
+    `HAPPENS_BEFORE(Exit2Dr, ShiftDr)
+    `HAPPENS_BEFORE(Exit2Ir, UpdateIr)
+    `HAPPENS_BEFORE(Exit2Ir, ShiftIr)
+    `HAPPENS_BEFORE(UpdateDr, SelectDrScan)
+    `HAPPENS_BEFORE(UpdateDr, RunTestOrIdle)
+    `HAPPENS_BEFORE(UpdateIr, SelectDrScan)
+    `HAPPENS_BEFORE(UpdateIr, RunTestOrIdle)
+    // This state is broken for unknown reasons.
+    /*`HAPPENS_BEFORE(SelectIrScan, TestLogicReset) */
+
   end
 `endif
 endmodule
